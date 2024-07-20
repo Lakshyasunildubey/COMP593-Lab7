@@ -1,51 +1,44 @@
 """
-Description:
- Prints the name and age of all people in the Social Network database
- who are age 50 or older, and saves the information to a CSV file.
-
-Usage:
- python old_people.py
+Name : Lakshya Dubey
+Student ID: 10331244
+Group: Rishi Patel, Bhavya Solanki, Lakshya Dubey 
 """
+
+import sqlite3
+import pandas as pd
 import os
-from create_db import db_path, script_dir
+
+# Determine the path of the database
+script_dir = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(script_dir, 'social_network.db')
+csv_path = os.path.join(script_dir, 'old_people.csv')
 
 def main():
-    old_people_list = get_old_people()
-    print_name_and_age(old_people_list)
+    old_people = query_old_people()
+    print_old_people(old_people)
+    save_to_csv(old_people)
 
-    old_people_csv = os.path.join(script_dir, 'old_people.csv')
-    save_name_and_age_to_csv(old_people_list, old_people_csv)
+def query_old_people():
+    """Queries the people table for all people who are at least 50 years old"""
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    c.execute('''
+        SELECT name, age FROM people
+        WHERE age >= 50
+    ''')
+    old_people = c.fetchall()
+    conn.close()
+    return old_people
 
-def get_old_people():
-    """Queries the Social Network database for all people who are at least 50 years old.
+def print_old_people(old_people):
+    """Prints the names and ages of all old people"""
+    for person in old_people:
+        print(f'{person[0]} is {person[1]} years old.')
 
-    Returns:
-        list: (name, age) of old people 
-    """
-    # TODO: Create function body
-    # Hint: See example code in lab instructions entitled "Getting People Data from the Database"
-    return
-
-def print_name_and_age(name_and_age_list):
-    """Prints name and age of all people in provided list
-
-    Args:
-        name_and_age_list (list): (name, age) of people
-    """
-    # TODO: Create function body
-    # Hint: Use a for loop to iterate the list of tuples to print a sentence for each old person
-    return
-
-def save_name_and_age_to_csv(name_and_age_list, csv_path):
-    """Saves name and age of all people in provided list
-
-    Args:
-        name_and_age_list (list): (name, age) of people
-        csv_path (str): Path of CSV file
-    """
-    # TODO: Create function body
-    # Hint: In Lab 3, we converted a list of tuples into a pandas DataFrame and saved it to a CSV file
-    return
+def save_to_csv(old_people):
+    """Saves the names and ages of all old people to a CSV file"""
+    df = pd.DataFrame(old_people, columns=['Name', 'Age'])
+    df.to_csv(csv_path, index=False)
 
 if __name__ == '__main__':
-   main()
+    main()
